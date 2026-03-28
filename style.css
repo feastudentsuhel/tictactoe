@@ -1,0 +1,355 @@
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:   #05051a;
+      --bg-mid:    #080828;
+      --x-col:     #7ecfff;
+      --x-glow:    rgba(126, 207, 255, 0.7);
+      --o-col:     #ff5577;
+      --o-glow:    rgba(255, 85, 119, 0.7);
+      --purple:    #9b5de5;
+      --purple-glow: rgba(155, 93, 229, 0.6);
+      --grid-line: rgba(155, 93, 229, 0.35);
+      --panel-bg:  rgba(20, 10, 60, 0.7);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-deep);
+      font-family: 'Rajdhani', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Perspective floor ── */
+    .floor {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 45vh;
+      background:
+        linear-gradient(to bottom, transparent 0%, rgba(100,30,180,0.15) 100%);
+      perspective: 400px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .floor-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(155,93,229,0.25) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(155,93,229,0.25) 1px, transparent 1px);
+      background-size: 40px 40px;
+      transform: rotateX(60deg) translateY(-20%);
+      transform-origin: top center;
+    }
+
+    /* ── Stars ── */
+    .stars {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 50%, rgba(255,255,255,0.3) 0%, transparent 100%);
+    }
+
+    /* ── Main container ── */
+    .container {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      width: min(400px, 96vw);
+      padding: 16px;
+    }
+
+    /* ── Top bar icons ── */
+    .topbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .icon-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2.5px solid var(--x-col);
+      background: transparent;
+      color: var(--x-col);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--x-glow), inset 0 0 6px rgba(126,207,255,0.1);
+      transition: box-shadow 0.2s;
+      font-size: 1.2rem;
+    }
+    .icon-btn:hover { box-shadow: 0 0 20px var(--x-glow), inset 0 0 12px rgba(126,207,255,0.2); }
+    .icon-btn.pink {
+      border-color: var(--o-col);
+      color: var(--o-col);
+      box-shadow: 0 0 10px var(--o-glow), inset 0 0 6px rgba(255,85,119,0.1);
+    }
+    .icon-btn.pink:hover { box-shadow: 0 0 20px var(--o-glow), inset 0 0 12px rgba(255,85,119,0.2); }
+
+    /* ── Player bar ── */
+    .player-bar {
+      width: 100%;
+      background: var(--panel-bg);
+      border: 2px solid var(--purple);
+      border-radius: 50px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 18px var(--purple-glow), inset 0 0 20px rgba(80,20,150,0.3);
+      position: relative;
+    }
+
+    /* Active player glow indicator */
+    .player-bar::before {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 20px; right: 50%;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--o-col);
+      box-shadow: 0 0 10px var(--o-glow);
+      transition: left 0.4s, right 0.4s, background 0.4s, box-shadow 0.4s;
+    }
+    /* turn-x means it's currently X's (Player 2 / blue) turn → indicator on RIGHT side in blue */
+    .player-bar.turn-x::before {
+      left: 50%; right: 20px;
+      background: var(--x-col);
+      box-shadow: 0 0 10px var(--x-glow);
+    }
+    /* turn-o means it's currently O's (Player 1 / red) turn → indicator on LEFT side in red */
+    .player-bar.turn-o::before {
+      left: 20px; right: 50%;
+      background: var(--o-col);
+      box-shadow: 0 0 10px var(--o-glow);
+    }
+
+    .player-info {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+
+    .player-label {
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .player-symbol {
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* O circle */
+    .sym-o {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 3.5px solid var(--o-col);
+      box-shadow: 0 0 12px var(--o-glow), inset 0 0 8px rgba(255,85,119,0.2);
+    }
+
+    /* X cross */
+    .sym-x {
+      position: relative; width: 36px; height: 36px;
+    }
+    .sym-x::before, .sym-x::after {
+      content: '';
+      position: absolute;
+      width: 100%; height: 3.5px;
+      background: var(--x-col);
+      box-shadow: 0 0 10px var(--x-glow);
+      border-radius: 2px;
+      top: 50%; left: 0;
+    }
+    .sym-x::before { transform: translateY(-50%) rotate(45deg); }
+    .sym-x::after  { transform: translateY(-50%) rotate(-45deg); }
+
+    /* Turn dots */
+    .turn-dots {
+      display: flex; gap: 6px;
+    }
+    .dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--o-col);
+      box-shadow: 0 0 6px var(--o-glow);
+      transition: background 0.3s;
+    }
+    .dot.filled { background: var(--o-col); }
+
+    /* ── Board ── */
+    .board-wrap {
+      width: 100%;
+      background: var(--panel-bg);
+      border: 2.5px solid var(--purple);
+      border-radius: 18px;
+      padding: 10px;
+      box-shadow: 0 0 30px var(--purple-glow), 0 0 60px rgba(80,20,150,0.2);
+    }
+
+    .board-container {
+      position: relative;
+      aspect-ratio: 1;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0;
+      width: 100%; height: 100%;
+    }
+
+    /* Strike line overlay */
+    #strike-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .strike-line {
+      stroke: #ffe94d;
+      stroke-width: 6;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px #ffe94d) drop-shadow(0 0 18px rgba(255,233,77,0.8));
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw-strike 0.45s cubic-bezier(.4,0,.2,1) forwards;
+    }
+
+    @keyframes draw-strike {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .cell {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      border-right: 1.5px solid var(--grid-line);
+      border-bottom: 1.5px solid var(--grid-line);
+      transition: background 0.2s;
+    }
+    .cell:nth-child(3n)   { border-right: none; }
+    .cell:nth-child(n+7)  { border-bottom: none; }
+
+    .cell:hover:not(.taken) { background: rgba(155, 93, 229, 0.08); }
+
+    /* SVG symbols inside cells */
+    .cell svg {
+      width: 65%; height: 65%;
+      opacity: 0;
+      transform: scale(0.3);
+      transition: opacity 0.3s cubic-bezier(.34,1.56,.64,1), transform 0.3s cubic-bezier(.34,1.56,.64,1);
+      overflow: visible;
+    }
+    .cell.filled svg { opacity: 1; transform: scale(1); }
+
+    /* X SVG */
+    .x-line {
+      stroke: var(--x-col);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px var(--x-col)) drop-shadow(0 0 14px var(--x-glow));
+    }
+
+    /* O SVG */
+    .o-circle {
+      fill: none;
+      stroke: var(--o-col);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px var(--o-col)) drop-shadow(0 0 14px var(--o-glow));
+    }
+
+    /* Winning cells */
+    .cell.winner-x { background: rgba(126,207,255,0.07); }
+    .cell.winner-o { background: rgba(255,85,119,0.07); }
+
+    .cell.winner-x svg .x-line {
+      filter: drop-shadow(0 0 10px var(--x-col)) drop-shadow(0 0 24px var(--x-glow));
+      animation: flicker-x 1.2s ease-in-out infinite alternate;
+    }
+    .cell.winner-o svg .o-circle {
+      filter: drop-shadow(0 0 10px var(--o-col)) drop-shadow(0 0 24px var(--o-glow));
+      animation: flicker-o 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes flicker-x {
+      from { filter: drop-shadow(0 0 6px var(--x-col)) drop-shadow(0 0 14px var(--x-glow)); }
+      to   { filter: drop-shadow(0 0 14px var(--x-col)) drop-shadow(0 0 30px var(--x-glow)); }
+    }
+    @keyframes flicker-o {
+      from { filter: drop-shadow(0 0 6px var(--o-col)) drop-shadow(0 0 14px var(--o-glow)); }
+      to   { filter: drop-shadow(0 0 14px var(--o-col)) drop-shadow(0 0 30px var(--o-glow)); }
+    }
+
+    /* ── Status ── */
+    .status {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      height: 18px;
+      transition: color 0.3s;
+    }
+    .status.win-x { color: var(--x-col); text-shadow: 0 0 12px var(--x-glow); }
+    .status.win-o { color: var(--o-col); text-shadow: 0 0 12px var(--o-glow); }
+    .status.draw  { color: var(--purple); text-shadow: 0 0 12px var(--purple-glow); }
+
+    /* ── Reset btn ── */
+    .reset-wrap {
+      display: flex; justify-content: center;
+    }
+    .btn-reset {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      border: 2.5px solid var(--x-col);
+      background: var(--panel-bg);
+      color: var(--x-col);
+      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 14px var(--x-glow), inset 0 0 10px rgba(126,207,255,0.1);
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-reset:hover {
+      box-shadow: 0 0 28px var(--x-glow), inset 0 0 18px rgba(126,207,255,0.2);
+      transform: scale(1.07);
+    }
+    .btn-reset:active { transform: scale(0.95); }
+
+    /* ── Score chips ── */
+    .scores {
+      display: flex; gap: 12px;
+    }
+    .chip {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: var(--panel-bg);
+      border: 1.5px solid var(--grid-line);
+      color: rgba(255,255,255,0.5);
+      display: flex; gap: 6px; align-items: center;
+    }
+    .chip .chip-val {
+      font-size: 0.9rem; font-weight: 700;
+    }
+    .chip.x-chip { border-color: var(--x-col); color: var(--x-col); }
+    .chip.o-chip { border-color: var(--o-col); color: var(--o-col); }
