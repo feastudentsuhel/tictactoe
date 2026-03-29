@@ -1,11 +1,20 @@
   const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
+  // Emoji sequence per move count
+  const EMOJIS = ['😊','🤔','😏','😬','😮','🫣','😅','😨','😱'];
+
   let board = Array(9).fill(null);
-  let current = 'O'; // O = Player 1 (red), X = Player 2 (blue)
-  let nextStarter = 'X'; // alternates who goes first each round
+  let current = 'O';
+  let nextStarter = 'X';
   let gameOver = false;
   let scores = { O: 0, X: 0, D: 0 };
-  let history = []; // for undo
+  let history = [];
+
+  const emojiBtn = document.getElementById('btn-emoji');
+
+  function setEmoji(emoji) {
+    emojiBtn.textContent = emoji;
+  }
 
   const boardEl    = document.getElementById('board');
   const playerBar  = document.getElementById('player-bar');
@@ -124,13 +133,19 @@
         scX.textContent = scores.X;
         const p = result.winner === 'O' ? 'Player 1' : 'Player 2';
         setStatus(`${p} Wins! 🎉`, result.winner === 'O' ? 'win-o' : 'win-x');
+        setEmoji('🥳');
       } else {
         scores.D++;
         scD.textContent = scores.D;
         setStatus('Draw!', 'draw');
+        setEmoji('😐');
       }
       return;
     }
+
+    // Update emoji based on move count
+    const moveCount = board.filter(Boolean).length;
+    setEmoji(EMOJIS[Math.min(moveCount, EMOJIS.length - 1)]);
 
     current = current === 'O' ? 'X' : 'O';
     playerBar.classList.toggle('turn-x', current === 'X');
@@ -161,6 +176,7 @@
     playerBar.classList.remove('turn-x','turn-o');
     playerBar.classList.add(current === 'O' ? 'turn-o' : 'turn-x');
     clearStrike();
+    setEmoji('😊');
     const p = current === 'O' ? 'Player 1' : 'Player 2';
     setStatus(`${p}'s Turn`, '');
     updateDots();
@@ -195,4 +211,5 @@
 
   // Init
   playerBar.classList.add('turn-o');
+  setEmoji('😊');
   updateDots();
