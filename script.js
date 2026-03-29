@@ -2,6 +2,7 @@
 
   let board = Array(9).fill(null);
   let current = 'O'; // O = Player 1 (red), X = Player 2 (blue)
+  let nextStarter = 'X'; // alternates who goes first each round
   let gameOver = false;
   let scores = { O: 0, X: 0, D: 0 };
   let history = []; // for undo
@@ -150,16 +151,18 @@
   function resetGame() {
     board.fill(null);
     gameOver = false;
-    current = 'O';
+    current = nextStarter;
+    nextStarter = nextStarter === 'O' ? 'X' : 'O'; // flip for next round
     history = [];
     boardEl.querySelectorAll('.cell').forEach(c => {
       c.className = 'cell';
       c.querySelectorAll('svg').forEach(s => s.style.display = 'none');
     });
     playerBar.classList.remove('turn-x','turn-o');
-    playerBar.classList.add('turn-o');
+    playerBar.classList.add(current === 'O' ? 'turn-o' : 'turn-x');
     clearStrike();
-    setStatus("Player 1's Turn", '');
+    const p = current === 'O' ? 'Player 1' : 'Player 2';
+    setStatus(`${p}'s Turn`, '');
     updateDots();
   }
 
